@@ -2,7 +2,7 @@
 Training roadmap:
 - Get weather as training data
 - Use simulated temperature dynamics to create env:
-    Training tuple: (indoor_temp1, outdoor_temp1, time) -> (Actions)
+    Training tuple: (indoor_temp1, outdoor_temp1, time_1, action, indor_temp2)
 '''
 
 

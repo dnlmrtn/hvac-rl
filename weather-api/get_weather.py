@@ -9,7 +9,6 @@ import json
 import time
 import csv
 
-# Replace YOUR_API_KEY with your actual API key from OpenWeatherMap
 api_key = "65070adbd42189eacd304b226051e8b6"
 lat = "43.6532"
 lon = "-79.3832"
@@ -21,8 +20,8 @@ with open("weather_data.csv", "w", newline="") as csvfile:
 
     writer.writeheader()  # Write the headers
 
-    # Loop through the required dates (For demonstration purposes, only one date is taken)
-    for i in range(1):  # You would loop through 365 days
+    # Loop through the required dates
+    for i in range(365):
         # Unix time stamp for the date
         time_stamp = int(time.time()) - i*3600*24
 
@@ -46,4 +45,4 @@ with open("weather_data.csv", "w", newline="") as csvfile:
             print("Status Code:", response.status_code)
             print("Response Text:", response.text)
 
-        time.sleep(1)  # To avoid hitting rate limits
+        time.sleep(1)
