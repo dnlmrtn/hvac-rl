@@ -9,7 +9,10 @@ Training roadmap:
 import tensorflow as tf
 import numpy as np
 import random
-import gym
+from gym import Env
+from gym.spaces import Discrete, Box
+import pandas as pd
+from datetime import datetime, timedelta
 # -------------------------
 # Weather and Zone Simulation
 # -------------------------
@@ -17,7 +20,65 @@ import gym
 # delta_indoor_temp = heat transfer from outside + heat transfer from fresh air damper + heat transfer from hvac
 # delta_indoor_temp = 0.1(outdoor_temp - indoor_temp) + 0.1*damper*(outdoor_temp-indoor_temp) + hvac
 
+weather_df = pd.read_csv('./data/weather_data.csv')
+temps = weather_df['temperature']
 
+SET_TEMP = 22.4
+time_format = "%H:%M:%S"
+start_time = datetime.strptime("16:00:00", time_format)
+
+
+class hvacEnv(Env):
+    def __init__(self):
+        # Initialize actions, observations
+        self.action_space = Discrete(10)
+
+        low = np.array([-10, -30], dtype=np.float32)
+        high = np.array([50, 50], dtype=np.float32)
+        self.observation_space = Box(low, high, dtype=np.float32)
+        self.idx = weather_df.shape[0]
+        self.state = (SET_TEMP, temps.values[-1])
+
+        pass
+
+    def step(self, action):
+        if self.idx == 0:
+            done = True
+        else:
+            self.idx -= 1
+            done = False
+
+        indoor_temp_1 = self.state[0]
+        outdoor_temp_1 = self.state[1]
+
+        # Calculate new indoor temp
+        new_indoor_temp = 0.1(outdoor_temp_1 - indoor_temp_1) + \
+            0.1*action[1]*(outdoor_temp_1-indoor_temp_1) + action[0]
+
+        # Update to next outdoor temp
+        new_outdoor_temp = temps[self.idx]
+
+        if 22 < new_indoor_temp < 23:
+            reward = 1
+        else:
+            reward = -1
+
+        # Assign placeholder for info
+        info = {}
+        # Assign new state
+        self.state = (new_indoor_temp, new_outdoor_temp)
+        return self.state, reward, done, info
+
+    def render(self):
+        pass
+
+    def reset(self):
+        self.idx = weather_df.shape[0]
+        self.state = (SET_TEMP, temps.values[-1])
+        return self.state
+
+
+test = hvacEnv()
 # -------------------------
 # DQN Agent
 # -------------------------
